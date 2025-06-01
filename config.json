@@ -1,0 +1,12 @@
+{
+  "bloqueo": {
+    "dispositivos": [],
+    "marcas": [],
+    "modelos": [],
+    "sistemas_operativos": [
+      "macOS"
+    ],
+    "navegadores": [],
+    "tipos_cliente": []
+  }
+}
