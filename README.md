@@ -9,12 +9,16 @@ Este proyecto es una demo de cómo usar el plugin [`node-device-detector`](https
 - Todo el frontend está separado en vistas EJS.
 
 ## Requisitos
-- Node.js 18 o superior (por compatibilidad con dependencias)
+- Node.js 18 (desarrollado y probado con esta versión)
 - npm
 
 ## Instalación
 1. Clona este repositorio o descarga los archivos.
-2. Instala las dependencias:
+2. Si usas nvm, cambia a Node 18:
+   ```bash
+   nvm use 18
+   ```
+3. Instala las dependencias:
    ```bash
    npm install
    ```
@@ -49,7 +53,7 @@ Este proyecto es una demo de cómo usar el plugin [`node-device-detector`](https
 
 ## Notas
 - El campo de modelos es de texto libre porque el plugin no expone un listado completo de modelos.
-- Si tienes problemas con dependencias, asegúrate de usar Node.js 18+.
+- Si tienes problemas con dependencias, asegúrate de usar Node.js 18.
 
 ## Licencia
 MIT 
