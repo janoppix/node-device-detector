@@ -15,7 +15,7 @@
         <label class="form-label">Tipos de dispositivo</label>
         <select class="form-select" name="bloqueo[dispositivos][]" multiple>
           <% deviceTypes.forEach(function(type) { %>
-            <option value="<%= type %>"><%= type %></option>
+            <option value="<%= type %>" <%= bloqueo.dispositivos && bloqueo.dispositivos.includes(type) ? 'selected' : '' %>><%= type %></option>
           <% }); %>
         </select>
       </div>
@@ -24,7 +24,7 @@
         <label class="form-label">Sistemas Operativos</label>
         <select class="form-select" name="bloqueo[sistemas_operativos][]" multiple>
           <% osSystems.forEach(function(os) { %>
-            <option value="<%= os %>"><%= os %></option>
+            <option value="<%= os %>" <%= bloqueo.sistemas_operativos && bloqueo.sistemas_operativos.includes(os) ? 'selected' : '' %>><%= os %></option>
           <% }); %>
         </select>
       </div>
@@ -33,7 +33,7 @@
         <label class="form-label">Navegadores</label>
         <select class="form-select" name="bloqueo[navegadores][]" multiple>
           <% browsers.forEach(function(browser) { %>
-            <option value="<%= browser %>"><%= browser %></option>
+            <option value="<%= browser %>" <%= bloqueo.navegadores && bloqueo.navegadores.includes(browser) ? 'selected' : '' %>><%= browser %></option>
           <% }); %>
         </select>
       </div>
@@ -42,7 +42,7 @@
         <label class="form-label">Tipos de Cliente</label>
         <select class="form-select" name="bloqueo[tipos_cliente][]" multiple>
           <% clientTypes.forEach(function(type) { %>
-            <option value="<%= type %>"><%= type %></option>
+            <option value="<%= type %>" <%= bloqueo.tipos_cliente && bloqueo.tipos_cliente.includes(type) ? 'selected' : '' %>><%= type %></option>
           <% }); %>
         </select>
       </div>
@@ -51,14 +51,14 @@
         <label class="form-label">Marcas</label>
         <select class="form-select" name="bloqueo[marcas][]" multiple>
           <% brands.forEach(function(brand) { %>
-            <option value="<%= brand %>"><%= brand %></option>
+            <option value="<%= brand %>" <%= bloqueo.marcas && bloqueo.marcas.includes(brand) ? 'selected' : '' %>><%= brand %></option>
           <% }); %>
         </select>
       </div>
       <!-- Modelos -->
       <div class="mb-3">
         <label class="form-label">Modelos (separados por coma)</label>
-        <input class="form-control" name="bloqueo[modelos]" placeholder="Ej: iPhone 13, SM-A505G" />
+        <input class="form-control" name="bloqueo[modelos]" placeholder="Ej: iPhone 13, SM-A505G" value="<%= bloqueo.modelos ? bloqueo.modelos.join ? bloqueo.modelos.join(', ') : bloqueo.modelos : '' %>" />
       </div>
       <button type="submit" class="btn btn-primary">Guardar configuración</button>
     </form>

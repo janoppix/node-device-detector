@@ -77,7 +77,14 @@ app.get("/", (req, res) => {
 
 // Formulario de configuración
 app.get("/formulario", (req, res) => {
-  res.render("formulario", { osSystems, deviceTypes, clientTypes, browsers, brands });
+  res.render("formulario", {
+    osSystems,
+    deviceTypes,
+    clientTypes,
+    browsers,
+    brands,
+    bloqueo: config.bloqueo
+  });
 });
 
 // Guardar configuración
