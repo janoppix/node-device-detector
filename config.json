@@ -3,10 +3,10 @@
     "dispositivos": [],
     "marcas": [],
     "modelos": [],
-    "sistemas_operativos": [
-      "macOS"
+    "sistemas_operativos": [],
+    "navegadores": [
+      "Chrome"
     ],
-    "navegadores": [],
     "tipos_cliente": []
   }
 }

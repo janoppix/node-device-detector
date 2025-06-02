@@ -1,92 +1,88 @@
+// =======================
+// 1. DEPENDENCIAS Y CONFIGURACIÓN
+// =======================
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const DeviceDetector = require("node-device-detector");
 let config = require("./config.json");
 
+// =======================
+// 2. CATÁLOGOS DE DATOS
+// =======================
+const osSystems = Object.values(require('node-device-detector/parser/os/os_systems')).sort();
+const deviceTypes = Object.values(require('node-device-detector/parser/const/device-type')).sort();
+const clientTypes = Object.values(require('node-device-detector/parser/const/client-type')).sort();
+const browsers = Object.values(require('node-device-detector/parser/client/browser-short')).sort();
+const brands = Object.values(require('node-device-detector/parser/device/brand-short')).sort();
+
+// =======================
+// 3. INICIALIZACIÓN DE EXPRESS
+// =======================
 const app = express();
 const detector = new DeviceDetector();
 const PORT = 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-// Ruta principal que detecta y muestra info del dispositivo
+// =======================
+// 4. FUNCIONES UTILITARIAS
+// =======================
+function limpieza(v) {
+  return Array.isArray(v)
+    ? v.map((s) => s.trim()).filter(Boolean)
+    : typeof v === "string"
+    ? v.split("\n").map((s) => s.trim()).filter(Boolean)
+    : [];
+}
+
+function obtenerMotivosBloqueo(config, result) {
+  const motivos = [];
+  if (config.bloqueo.dispositivos?.includes(result.device?.type)) {
+    motivos.push(`Tipo de dispositivo: ${result.device?.type}`);
+  }
+  if (config.bloqueo.marcas?.includes(result.device?.brand)) {
+    motivos.push(`Marca: ${result.device?.brand}`);
+  }
+  if (config.bloqueo.modelos?.includes(result.device?.model)) {
+    motivos.push(`Modelo: ${result.device?.model}`);
+  }
+  if (config.bloqueo.sistemas_operativos?.includes(result.os?.name)) {
+    motivos.push(`Sistema operativo: ${result.os?.name}`);
+  }
+  if (config.bloqueo.navegadores?.includes(result.client?.name)) {
+    motivos.push(`Navegador: ${result.client?.name}`);
+  }
+  if (config.bloqueo.tipos_cliente?.includes(result.client?.type)) {
+    motivos.push(`Tipo de cliente: ${result.client?.type}`);
+  }
+  return motivos;
+}
+
+// =======================
+// 5. RUTAS
+// =======================
+
+// Página principal
 app.get("/", (req, res) => {
   const ua = req.headers["user-agent"] || "";
   const result = detector.detect(ua);
-
-  const bloqueado =
-    config.bloqueo.dispositivos?.includes(result.device?.type) ||
-    config.bloqueo.marcas?.includes(result.device?.brand) ||
-    config.bloqueo.modelos?.includes(result.device?.model) ||
-    config.bloqueo.sistemas_operativos?.includes(result.os?.name) ||
-    config.bloqueo.navegadores?.includes(result.client?.name) ||
-    config.bloqueo.tipos_cliente?.includes(result.client?.type);
-
-  const html = `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8">
-      <title>Resultado de Detección</title>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-      <div class="container py-5">
-        <h1 class="mb-4">${bloqueado ? "🚫 Acceso restringido" : "✅ Acceso permitido"}</h1>
-
-        <div class="card mb-4">
-          <div class="card-header fw-bold">Dispositivo Detectado</div>
-          <div class="card-body">
-            <p><strong>User-Agent:</strong> ${ua}</p>
-            <p><strong>Tipo:</strong> ${result.device?.type || "N/A"}</p>
-            <p><strong>Marca:</strong> ${result.device?.brand || "N/A"}</p>
-            <p><strong>Modelo:</strong> ${result.device?.model || "N/A"}</p>
-          </div>
-        </div>
-
-        <div class="card mb-4">
-          <div class="card-header fw-bold">Sistema Operativo</div>
-          <div class="card-body">
-            <p><strong>Nombre:</strong> ${result.os?.name || "N/A"}</p>
-            <p><strong>Versión:</strong> ${result.os?.version || "N/A"}</p>
-          </div>
-        </div>
-
-        <div class="card mb-4">
-          <div class="card-header fw-bold">Cliente</div>
-          <div class="card-body">
-            <p><strong>Tipo:</strong> ${result.client?.type || "N/A"}</p>
-            <p><strong>Nombre:</strong> ${result.client?.name || "N/A"}</p>
-            <p><strong>Versión:</strong> ${result.client?.version || "N/A"}</p>
-          </div>
-        </div>
-
-        <a href="/formulario" class="btn btn-secondary">Volver al formulario de bloqueo</a>
-      </div>
-    </body>
-    </html>
-  `;
-
-  res.send(html);
+  const motivosBloqueo = obtenerMotivosBloqueo(config, result);
+  const bloqueado = motivosBloqueo.length > 0;
+  res.render("resultado", { ua, result, bloqueado, motivosBloqueo });
 });
 
-// Muestra el formulario de configuración
+// Formulario de configuración
 app.get("/formulario", (req, res) => {
-  res.sendFile(path.join(__dirname, "formulario.html"));
+  res.render("formulario", { osSystems, deviceTypes, clientTypes, browsers, brands });
 });
 
-// Actualiza la configuración desde el formulario
+// Guardar configuración
 app.post("/config", (req, res) => {
   const entradas = req.body.bloqueo || {};
-  const limpieza = (v) =>
-    Array.isArray(v)
-      ? v.map((s) => s.trim()).filter(Boolean)
-      : typeof v === "string"
-      ? v.split("\n").map((s) => s.trim()).filter(Boolean)
-      : [];
-
   const nuevaConfig = {
     bloqueo: {
       dispositivos: limpieza(entradas.dispositivos),
@@ -101,34 +97,19 @@ app.post("/config", (req, res) => {
       tipos_cliente: limpieza(entradas.tipos_cliente),
     },
   };
-
   fs.writeFile("config.json", JSON.stringify(nuevaConfig, null, 2), (err) => {
     if (err) {
       return res.status(500).json({ error: "Error al guardar configuración" });
     }
-
     delete require.cache[require.resolve("./config.json")];
     config = require("./config.json");
-
-    res.send(`
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-        <meta charset="UTF-8">
-        <title>Configuración actualizada</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-      </head>
-      <body class="bg-light">
-        <div class="container py-5">
-          <h1 class="mb-4 text-success">✅ Configuración guardada correctamente</h1>
-          <a href="/" class="btn btn-primary">Volver al inicio</a>
-        </div>
-      </body>
-      </html>
-    `);
+    res.render("config-guardada");
   });
 });
 
+// =======================
+// 6. ARRANQUE DEL SERVIDOR
+// =======================
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
