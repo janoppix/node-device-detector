@@ -2,6 +2,7 @@
 
 Este proyecto es una demo de cómo usar el plugin [`node-device-detector`](https://www.npmjs.com/package/node-device-detector) en un servidor Express para detectar dispositivos, sistemas operativos, navegadores y más a partir del User-Agent, y restringir el acceso según una configuración editable desde un formulario web.
 
+#
 ## Características
 - Detecta tipo de dispositivo, marca, modelo, sistema operativo, navegador y tipo de cliente.
 - Permite configurar restricciones desde un formulario web con selects dinámicos.
